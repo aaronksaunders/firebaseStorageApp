@@ -114,10 +114,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
       // copied from the Firebase console
       // Initialize Firebase
       var config = {
-        apiKey: "AIzaSyBb0yc3UWwQPy_dvkcRLThNfQZuNx9jZ-g",
-        authDomain: "fir-starterapp.firebaseapp.com",
-        databaseURL: "https://fir-starterapp.firebaseio.com",
-        storageBucket: "fir-starterapp.appspot.com",
+
       };
       firebase.initializeApp(config);
 

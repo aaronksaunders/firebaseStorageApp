@@ -12,3 +12,21 @@ Demonstrating file upload to Firebase with the Image Picker Plugin, Cordova File
 - Cordova imagePicker Plugin - http://ngcordova.com/docs/plugins/ima...
 - Cordova File Manager Plugin - http://ngcordova.com/docs/plugins/file/
 - Firebase Documentation - https://console.firebase.google.com
+
+
+## Android Specific Changes
+---
+The plugin does not properly specify the permissions for android so the picker might not get the images, see this PR.
+I just installed the alternate plugin from this location - https://github.com/poocart/cordova-imagePicker
+
+Instead of getting the path from the URI, in the code, I assume the following...
+
+```JavaScript
+  // modify the image path when on Android
+  if ($ionicPlatform.is("android")) {
+    path = cordova.file.cacheDirectory
+  } else {
+    path = cordova.file.tempDirectory
+  }
+```
+feel free to parse the path to get the directory
