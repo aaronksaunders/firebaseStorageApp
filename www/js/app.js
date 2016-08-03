@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic', 'ngCordova'])
 
-  .controller('AppController', function ($scope, $cordovaImagePicker, $cordovaFile) {
+  .controller('AppController', function ($scope, $cordovaImagePicker, $cordovaFile, $ionicPlatform) {
 
 
     /** 
@@ -61,20 +61,30 @@ angular.module('starter', ['ionic', 'ngCordova'])
           // http://ngcordova.com/docs/plugins/file/
           var fileName = results[0].replace(/^.*[\\\/]/, '');
 
-    $cordovaFile.readAsArrayBuffer(cordova.file.tempDirectory, fileName)
-      .then(function (success) {
-        // success - get blob data
-        var imageBlob = new Blob([success], { type: "image/jpeg" });
+          var path = "";
 
-        // missed some params... probably should be a promise.. :-(
-        saveToFirebase(imageBlob, fileName, function (_response) {
-          if (_response) {
-            alert(_response.downloadURL)
+          // modify the image path when on Android
+          if ($ionicPlatform.is("android")) {
+            path = cordova.file.cacheDirectory
+          } else {
+            path = cordova.file.tempDirectory
           }
-        })
-      }, function (error) {
-        // error
-      });
+
+          $cordovaFile.readAsArrayBuffer(path, fileName)
+            .then(function (success) {
+              // success - get blob data
+              var imageBlob = new Blob([success], { type: "image/jpeg" });
+
+              // missed some params... probably should be a promise.. :-(
+              saveToFirebase(imageBlob, fileName, function (_response) {
+                if (_response) {
+                  alert(_response.downloadURL)
+                }
+              })
+            }, function (error) {
+              // error
+              console.log(error)
+            });
 
 
         }, function (error) {
@@ -104,10 +114,10 @@ angular.module('starter', ['ionic', 'ngCordova'])
       // copied from the Firebase console
       // Initialize Firebase
       var config = {
-        apiKey: "AIzaSyDLlSrO7LDmhbQl6q-2sQ_LLStL7PqPIM8",
-        authDomain: "testing-access-f4dd4.firebaseapp.com",
-        databaseURL: "https://testing-access-f4dd4.firebaseio.com",
-        storageBucket: "testing-access-f4dd4.appspot.com",
+        apiKey: "AIzaSyBb0yc3UWwQPy_dvkcRLThNfQZuNx9jZ-g",
+        authDomain: "fir-starterapp.firebaseapp.com",
+        databaseURL: "https://fir-starterapp.firebaseio.com",
+        storageBucket: "fir-starterapp.appspot.com",
       };
       firebase.initializeApp(config);
 
