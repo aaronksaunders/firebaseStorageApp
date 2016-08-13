@@ -5,39 +5,114 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic', 'ngCordova'])
 
-  .controller('AppController', function ($scope, $cordovaImagePicker, $cordovaFile, $ionicPlatform) {
+  .controller('AppController', function ($scope, $cordovaImagePicker, $cordovaFile, $ionicPlatform, $q, $timeout) {
 
+    // MOVE LOGIN TO START OF CONTROLLER
+    // using anonymous auth for this example
+    firebase.auth().signInAnonymously()
+      .then(function (_auth) {
+        alert("Logged In!")
+
+        // after we login, we want to load up any data
+        loadData();
+
+      })
+      .catch(function (error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+
+        alert(errorMessage)
+
+      });
+
+    /**
+     * query firebase database for a list of images stored in the 
+     * firebase storage. You cannot query firebase storage for a list
+     * of objects.
+     * 
+     */
+    function loadData() {
+
+      firebase.database().ref('assets').on('value', function(_snapshot){
+
+        // need to reset array each time
+        var result = [];
+
+        // loop through the snapshot to get the objects
+        // to display in the list
+        _snapshot.forEach(function (childSnapshot) {
+          // get key & data...
+          // var element = Object.assign({ id: childSnapshot.key }, childSnapshot.val());
+          var element = childSnapshot.val();
+          element.id = childSnapshot.key;
+
+          // add to array object
+          result.push(element);
+        }); 
+
+        // put the array on the $scope for display in the UI,
+        // we will wrap it in a $timeout to ensure the screen is
+        // updated   
+        $timeout(function () {
+          $scope.assetCollection = result;
+        }, 2);    
+      })
+    }
 
     /** 
      *  from documentation:
      *  https://firebase.google.com/docs/storage/web/upload-files
+     * 
+     * This function returns a promise now to better process the
+     * image data.
      */
-    function saveToFirebase(_imageBlob, _filename, _callback) {
+    function saveToFirebase(_imageBlob, _filename) {
 
-      // Create a root reference to the firebase storage
-      var storageRef = firebase.storage().ref();
+      return $q(function (resolve, reject) {
+        // Create a root reference to the firebase storage
+        var storageRef = firebase.storage().ref();
 
-      // pass in the _filename, and save the _imageBlob
-      var uploadTask = storageRef.child('images/' + _filename).put(_imageBlob);
+        // pass in the _filename, and save the _imageBlob
+        var uploadTask = storageRef.child('images/' + _filename).put(_imageBlob);
 
-      // Register three observers:
-      // 1. 'state_changed' observer, called any time the state changes
-      // 2. Error observer, called on failure
-      // 3. Completion observer, called on successful completion
-      uploadTask.on('state_changed', function (snapshot) {
-        // Observe state change events such as progress, pause, and resume
-        // See below for more detail
-      }, function (error) {
-        // Handle unsuccessful uploads, alert with error message
-        alert(error.message)
-        _callback(null)
-      }, function () {
-        // Handle successful uploads on complete
-        var downloadURL = uploadTask.snapshot.downloadURL;
+        // Register three observers:
+        // 1. 'state_changed' observer, called any time the state changes
+        // 2. Error observer, called on failure
+        // 3. Completion observer, called on successful completion
+        uploadTask.on('state_changed', function (snapshot) {
+          // Observe state change events such as progress, pause, and resume
+          // See below for more detail
+        }, function (error) {
+          // Handle unsuccessful uploads, alert with error message
+          alert(error.message)
+          reject(error)
+        }, function () {
+          // Handle successful uploads on complete
+          var downloadURL = uploadTask.snapshot.downloadURL;
 
-        // when done, pass back information on the saved image
-        _callback(uploadTask.snapshot)
+          // when done, pass back information on the saved image
+          resolve(uploadTask.snapshot)
+        });
       });
+    }
+
+
+    function saveReferenceInDatabase(_snapshot) {
+      var ref = firebase.database().ref('assets');
+
+      // see information in firebase documentation on storage snapshot and metaData
+      var dataToSave =  {
+        'URL': _snapshot.downloadURL, // url to access file
+        'name': _snapshot.metadata.name, // name of the file
+        'owner': firebase.auth().currentUser.uid, 
+        'email': firebase.auth().currentUser.email,
+        'lastUpdated': new Date().getTime(),
+      };
+
+      return ref.push(dataToSave).catch(function(_error){
+        alert("Error Saving to Assets " + _error.message);
+      })
     }
 
     /** 
@@ -52,6 +127,8 @@ angular.module('starter', ['ionic', 'ngCordova'])
         quality: 80
       };
 
+      var fileName, path;
+
       $cordovaImagePicker.getPictures(options)
         .then(function (results) {
           console.log('Image URI: ' + results[0]);
@@ -59,9 +136,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
           // lets read the image into an array buffer..
           // see documentation:
           // http://ngcordova.com/docs/plugins/file/
-          var fileName = results[0].replace(/^.*[\\\/]/, '');
-
-          var path = "";
+          fileName = results[0].replace(/^.*[\\\/]/, '');
 
           // modify the image path when on Android
           if ($ionicPlatform.is("android")) {
@@ -70,25 +145,22 @@ angular.module('starter', ['ionic', 'ngCordova'])
             path = cordova.file.tempDirectory
           }
 
-          $cordovaFile.readAsArrayBuffer(path, fileName)
-            .then(function (success) {
-              // success - get blob data
-              var imageBlob = new Blob([success], { type: "image/jpeg" });
+          return $cordovaFile.readAsArrayBuffer(path, fileName);
+        }).then(function (success) {
+          // success - get blob data
+          var imageBlob = new Blob([success], { type: "image/jpeg" });
 
-              // missed some params... probably should be a promise.. :-(
-              saveToFirebase(imageBlob, fileName, function (_response) {
-                if (_response) {
-                  alert(_response.downloadURL)
-                }
-              })
-            }, function (error) {
-              // error
-              console.log(error)
-            });
-
-
+          // missed some params... NOW it is a promise!!
+          return saveToFirebase(imageBlob, fileName);
+        }).then(function (_responseSnapshot) {
+          // we have the information on the image we saved, now 
+          // let's save it in the realtime database
+          return saveReferenceInDatabase(_responseSnapshot)
+        }).then(function (_response) {
+          alert("Saved Successfully!!")
         }, function (error) {
-          // error getting photos
+          // error
+          console.log(error)
         });
     }
 
@@ -110,26 +182,15 @@ angular.module('starter', ['ionic', 'ngCordova'])
         StatusBar.styleDefault();
       }
 
-      // INITIALIZE FIREBASE...
-      // copied from the Firebase console
-      // Initialize Firebase
-      var config = {
-
-      };
-      firebase.initializeApp(config);
-
-      // using anonymous auth for this example
-      firebase.auth().signInAnonymously()
-        .then(function (_auth) {
-          alert("Logged In!")
-        })
-        .catch(function (error) {
-          // Handle Errors here.
-          var errorCode = error.code;
-          var errorMessage = error.message;
-
-          alert(errorMessage)
-
-        });
     });
+
+    // INITIALIZE FIREBASE...
+    // copied from the Firebase console
+    var config = {
+      apiKey: "AIzaSyBb0yc3UWwQPy_dvkcRLThNfQZuNx9jZ-g",
+      authDomain: "fir-starterapp.firebaseapp.com",
+      databaseURL: "https://fir-starterapp.firebaseio.com",
+      storageBucket: "fir-starterapp.appspot.com",
+    };
+    firebase.initializeApp(config);
   })

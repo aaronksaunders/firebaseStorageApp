@@ -36,7 +36,15 @@
     <div class="bar bar-subheader">
       <button class="button" ng-click="doGetImage()">Pick Image</button>
     </div>
-    <ion-content>
+    <ion-content class="padding" style="top:90px">
+      <ion-list>
+        <ion-item ng-repeat="item in assetCollection track by $index">
+          <p> {{$index}} - {{item.name}}</p>
+          <p>{{item.lastUpdated | date: 'medium'}}</p>
+          <!-- display the image -->
+          <img ng-src={{item.URL}} width="180px" class="padding"/>
+        </ion-item>
+      </ion-list>
     </ion-content>
   </ion-pane>
 </body>
