@@ -1,10 +1,18 @@
 # firebaseStorageApp
 Source Code From YouTube Video on IonicFramework and Firebase Storage
 
-**Ionic Framework 1 - Firebase Storage File Upload Video**
+**Ionic Framework 1 - Firebase Storage File Upload Video Part One**
 - [https://www.youtube.com/watch?v=Z1F-0PnLgb8](https://www.youtube.com/watch?v=Z1F-0PnLgb8)
+- Code : https://github.com/aaronksaunders/firebaseStorageApp/releases/tag/p1.0.0
  
   [![Alt text](https://img.youtube.com/vi/Z1F-0PnLgb8/0.jpg)](https://www.youtube.com/watch?v=Z1F-0PnLgb8)
+
+**Ionic Framework 1 - Firebase Storage File Upload Video Part Two**
+- [https://youtu.be/2bDBwmyifGI](https://youtu.be/2bDBwmyifGI)
+- Code : https://github.com/aaronksaunders/firebaseStorageApp/releases/tag/p2.0.0
+
+[![Alt text](https://img.youtube.com/vi/2bDBwmyifGI/0.jpg)](https://www.youtube.com/watch?v=2bDBwmyifGI)
+- Code : https://github.com/aaronksaunders/firebaseStorageApp/releases/tag/p1.0.0
 
 Demonstrating file upload to Firebase with the Image Picker Plugin, Cordova File Plugin and ngCordova
 
