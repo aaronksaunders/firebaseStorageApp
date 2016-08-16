@@ -38,3 +38,11 @@ Instead of getting the path from the URI, in the code, I assume the following...
   }
 ```
 feel free to parse the path to get the directory
+
+## Firebase Data Structure
+
+### Realtime Database
+![https://raw.githubusercontent.com/aaronksaunders/firebaseStorageApp/master/Screenshot%202016-08-16%2016.12.04.png](https://raw.githubusercontent.com/aaronksaunders/firebaseStorageApp/master/Screenshot%202016-08-16%2016.12.04.png)
+
+### Storage Database
+![https://github.com/aaronksaunders/firebaseStorageApp/blob/master/Screenshot%202016-08-16%2016.12.27.png](https://github.com/aaronksaunders/firebaseStorageApp/blob/master/Screenshot%202016-08-16%2016.12.27.png?raw=true)
