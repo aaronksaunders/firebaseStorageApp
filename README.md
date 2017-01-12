@@ -17,7 +17,7 @@ Source Code From YouTube Video on IonicFramework and Firebase Storage
 Demonstrating file upload to Firebase with the Image Picker Plugin, Cordova File Plugin and ngCordova
 
 - Installation information for ngCordova - http://ngcordova.com/docs/install/
-- Cordova imagePicker Plugin - http://ngcordova.com/docs/plugins/ima...
+- Cordova imagePicker Plugin - https://github.com/wymsee/cordova-imagePicker
 - Cordova File Manager Plugin - http://ngcordova.com/docs/plugins/file/
 - Firebase Documentation - https://console.firebase.google.com
 
